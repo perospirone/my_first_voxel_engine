@@ -2,8 +2,8 @@ use std::borrow::Cow;
 
 use winit::event::WindowEvent;
 
-pub struct Graphics<'a> {
-    pub surface: wgpu::Surface<'a>,
+pub struct Graphics {
+    pub surface: wgpu::Surface,
     pub device: wgpu::Device,
     pub queue: wgpu::Queue,
     pub config: wgpu::SurfaceConfiguration,
@@ -14,8 +14,8 @@ pub struct Graphics<'a> {
     //pub window: &'a crate::Window,
 }
 
-impl<'a> Graphics<'a> {
-    pub async  fn new(window: &'a crate::Window) -> Graphics<'a> {
+impl Graphics {
+    pub async  fn new(window: &crate::Window) -> Self {
         let size = window.window.inner_size();
 
         // The instance is a handle to our GPU
