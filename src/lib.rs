@@ -1,4 +1,5 @@
 mod window;
+mod graphics;
 
 use winit::{
     event::*,
@@ -6,12 +7,17 @@ use winit::{
     keyboard::{KeyCode, PhysicalKey},
 };
 
-use window::{Window, WindowEvents};
+use crate::{
+    window::{ Window, WindowEvents },
+    graphics::Graphics,
+};
 
-pub fn run() {
+pub async fn run() {
     env_logger::init();
 
-    let window = Window::new("my first voxel engine");
+    let mut window = Window::new("my first voxel engine");
+
+    let graphics = Graphics::new(&window).await;
 
     window.run(move |event| match event {
         WindowEvents::Resized { width, height } => {
