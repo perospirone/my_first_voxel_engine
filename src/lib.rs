@@ -3,7 +3,7 @@ mod graphics;
 use winit::{
     dpi::PhysicalSize,
     event::*,
-    event_loop::EventLoop,
+    event_loop::{ControlFlow, EventLoop},
     keyboard::{KeyCode, PhysicalKey},
     window::Window,
 };
@@ -44,32 +44,50 @@ pub async fn run() {
             Event::WindowEvent {
                 ref event,
                 window_id,
-            } if window_id == graphics.window().id() => if !graphics.input(event) {
-               match event {
-                WindowEvent::CloseRequested
-                | WindowEvent::KeyboardInput {
-                    event:
-                        KeyEvent {
-                            state: ElementState::Pressed,
-                            physical_key: PhysicalKey::Code(KeyCode::Escape),
+            } if window_id == graphics.window().id() => {
+                if !graphics.input(event) {
+                    match event {
+                        WindowEvent::CloseRequested
+                        | WindowEvent::KeyboardInput {
+                            event:
+                                KeyEvent {
+                                    state: ElementState::Pressed,
+                                    physical_key: PhysicalKey::Code(KeyCode::Escape),
+                                    ..
+                                },
                             ..
-                        },
-                    ..
-                } => control_flow.exit(),
-                                WindowEvent::Resized(physical_size) => graphics.resize(*physical_size),
+                        } => control_flow.exit(),
+                        WindowEvent::Resized(physical_size) => graphics.resize(*physical_size),
+                        WindowEvent::RedrawRequested => {
+                            graphics.update();
+                            match graphics.render() {
+                                Ok(_) => {}
+                                // Reconfigure the surface if lost
+                                Err(wgpu::SurfaceError::Lost) => graphics.resize(graphics.size),
+                                // The system is out of memory, we should probably quit
+                                Err(wgpu::SurfaceError::OutOfMemory) => control_flow.exit(),
+                                // All other errors (Outdated, Timeout) should be resolved by the next frame
+                                Err(e) => eprintln!("{:?}", e),
+                            }
+                        }
 
-                WindowEvent::KeyboardInput {
-                    device_id,
-                    event,
-                    is_synthetic,
-                } => {
-                    println!("{:?}", event);
+                        WindowEvent::KeyboardInput {
+                            device_id,
+                            event,
+                            is_synthetic,
+                        } => {
+                            println!("{:?}", event);
+                        }
+                        _ => {}
+                    }
                 }
-                _ => {}
-               }
-            },
+            }
+            Event::AboutToWait => {
+                // RedrawRequested will only trigger once unless we manually
+                // request it.
+                graphics.window().request_redraw();
+            }
             _ => {}
-        }
-        )
+        })
         .unwrap();
 }
