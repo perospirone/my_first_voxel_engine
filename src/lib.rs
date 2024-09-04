@@ -1,35 +1,15 @@
 mod graphics;
 
 use winit::{
-    dpi::PhysicalSize,
-    event::*,
-    event_loop::{ControlFlow, EventLoop},
+    event::{ElementState, Event, KeyEvent, WindowEvent},
+    event_loop::EventLoop,
     keyboard::{KeyCode, PhysicalKey},
-    window::Window,
 };
 
 use crate::graphics::Graphics;
 
 pub async fn run() {
     env_logger::init();
-
-    // window.run(move |event| match event {
-    //     WindowEvents::Resized { width, height } => {
-    //         // state.resize(winit::dpi::PhysicalSize { width, height });
-    //         // todo!();
-    //     }
-    //     WindowEvents::Draw => {
-    //         //state.update();
-    //         //state.render();
-    //     }
-    //     WindowEvents::Keyboard {
-    //         state,
-    //         virtual_keycode,
-    //     } => {
-    //         println!("{:?}", state);
-    //         println!("{:?}", virtual_keycode);
-    //     }
-    // });
 
     let event_loop = EventLoop::new().unwrap();
     let window = winit::window::WindowBuilder::new()

@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use winit::{event::WindowEvent, window::Window};
 
 pub struct Graphics<'a> {
@@ -99,7 +97,7 @@ impl<'a> Graphics<'a> {
     pub fn input(&mut self, event: &WindowEvent) -> bool {
         match event {
             WindowEvent::CursorMoved {
-                device_id,
+                device_id: _,
                 position,
             } => {
                 println!("{:?}", position);
