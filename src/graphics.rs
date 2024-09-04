@@ -1,9 +1,9 @@
 use std::borrow::Cow;
 
-use winit::event::WindowEvent;
+use winit::{event::WindowEvent, window::Window};
 
-pub struct Graphics {
-    pub surface: wgpu::Surface,
+pub struct Graphics<'a> {
+    pub surface: wgpu::Surface<'a>,
     pub device: wgpu::Device,
     pub queue: wgpu::Queue,
     pub config: wgpu::SurfaceConfiguration,
@@ -11,12 +11,12 @@ pub struct Graphics {
     // The window must be declared after the surface so
     // it gets dropped after it as the surface contains
     // unsafe references to the window's resources.
-    //pub window: &'a crate::Window,
+    pub window: &'a Window,
 }
 
-impl Graphics {
-    pub async  fn new(window: &crate::Window) -> Self {
-        let size = window.window.inner_size();
+impl<'a> Graphics<'a> {
+    pub async fn new(window: &'a Window) -> Graphics<'a> {
+        let size = window.inner_size();
 
         // The instance is a handle to our GPU
         // Backends::all => Vulkan + Metal + DX12 + Browser WebGPU
@@ -25,7 +25,7 @@ impl Graphics {
             ..Default::default()
         });
 
-        let surface = instance.create_surface(&window.window).unwrap();
+        let surface = instance.create_surface(window).unwrap();
 
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
@@ -36,62 +36,42 @@ impl Graphics {
             .await
             .unwrap();
 
-        println!("{:?}", adapter.get_info());
+        println!("{:?}", adapter.get_info()); // i want this because in vintage story when i initialize the game this informations appears in my terminal, then i want the same
 
         let (device, queue) = adapter
             .request_device(
                 &wgpu::DeviceDescriptor {
-                    required_features: wgpu::Features::empty(), // idk this
+                    required_features: wgpu::Features::empty(),
                     required_limits: wgpu::Limits::default(),
                     label: None,
                     memory_hints: wgpu::MemoryHints::MemoryUsage,
                 },
-                None, // Trace path
+                None,
             )
             .await
             .unwrap();
 
-        let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
-            label: Some("shader.wgsl"),
-            source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!("shader.wgsl"))),
-        });
-
-        let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: None,
-            bind_group_layouts: &[],
-            push_constant_ranges: &[],
-        });
-
-        let swapchain_capabilities = surface.get_capabilities(&adapter);
-        let swapchain_format = swapchain_capabilities.formats[0];
-
-        let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: None,
-            layout: Some(&pipeline_layout),
-            vertex: wgpu::VertexState {
-                module: &shader,
-                entry_point: "vs_main",
-                buffers: &[],
-                compilation_options: Default::default(),
-            },
-            fragment: Some(wgpu::FragmentState {
-                module: &shader,
-                entry_point: "fs_main",
-                compilation_options: Default::default(),
-                targets: &[Some(swapchain_format.into())],
-            }),
-            primitive: wgpu::PrimitiveState::default(),
-            depth_stencil: None,
-            multisample: wgpu::MultisampleState::default(),
-            multiview: None,
-            cache: None,
-        });
-
-        let config = surface
-            .get_default_config(&adapter, size.width, size.height)
-            .unwrap();
-
-        surface.configure(&device, &config);
+        let surface_caps = surface.get_capabilities(&adapter);
+        // Shader code in this tutorial assumes an sRGB surface texture. Using a different
+        // one will result in all the colors coming out darker. If you want to support non
+        // sRGB surfaces, you'll need to account for that when drawing to the frame.
+        let surface_format = surface_caps
+            .formats
+            .iter()
+            .find(|f| f.is_srgb())
+            .copied()
+            .unwrap_or(surface_caps.formats[0]);
+        let config = wgpu::SurfaceConfiguration {
+            // maybe i should name this variable as surface_config
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+            format: surface_format,
+            width: size.width,
+            height: size.height,
+            present_mode: surface_caps.present_modes[0],
+            alpha_mode: surface_caps.alpha_modes[0],
+            view_formats: vec![],
+            desired_maximum_frame_latency: 2,
+        };
 
         Self {
             surface,
@@ -99,27 +79,32 @@ impl Graphics {
             queue,
             config,
             size,
-            // window,
+            window,
         }
     }
 
-    // pub fn window(&self) -> &crate::Window {
-    //     &self.window
-    // }
+    pub fn window(&self) -> &Window {
+        &self.window
+    }
 
-    fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
+    pub fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
+        if new_size.width > 0 && new_size.height > 0 {
+            self.size = new_size;
+            self.config.width = new_size.width;
+            self.config.height = new_size.height;
+            self.surface.configure(&self.device, &self.config);
+        }
+    }
+
+    pub fn input(&mut self, event: &WindowEvent) -> bool {
+        false
+    }
+
+    pub fn update(&mut self) {
         todo!()
     }
 
-    fn input(&mut self, event: &WindowEvent) -> bool {
-        todo!()
-    }
-
-    fn update(&mut self) {
-        todo!()
-    }
-
-    fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
+    pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
         todo!()
     }
 }
