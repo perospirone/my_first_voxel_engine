@@ -1,4 +1,5 @@
 mod graphics;
+mod texture;
 
 use winit::{
     event::{ElementState, Event, KeyEvent, WindowEvent},
@@ -56,7 +57,7 @@ pub async fn run() {
                             event,
                             is_synthetic,
                         } => {
-                            println!("{:?}", event);
+                            // println!("input {:?}", event);
                         }
                         _ => {}
                     }
