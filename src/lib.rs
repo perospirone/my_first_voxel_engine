@@ -1,3 +1,5 @@
+mod camera;
+mod camera_controller;
 mod graphics;
 mod texture;
 
