@@ -36,30 +36,145 @@ impl Vertex {
     }
 }
 
+// const VERTICES: &[Vertex] = &[
+//     Vertex {
+//         position: [-0.0868241, 0.49240386, 0.0],
+//         tex_coords: [0.4131759, 0.00759614],
+//     },
+//     Vertex {
+//         position: [-0.49513406, 0.06958647, 0.0],
+//         tex_coords: [0.0048659444, 0.43041354],
+//     },
+//     Vertex {
+//         position: [-0.21918549, -0.44939706, 0.0],
+//         tex_coords: [0.28081453, 0.949397],
+//     },
+//     Vertex {
+//         position: [0.35966998, -0.3473291, 0.0],
+//         tex_coords: [0.85967, 0.84732914],
+//     },
+//     Vertex {
+//         position: [0.44147372, 0.2347359, 0.0],
+//         tex_coords: [0.9414737, 0.2652641],
+//     },
+// ];
+
+// const INDICES: &[u16] = &[0, 1, 4, 1, 2, 4, 2, 3, 4];
+
 const VERTICES: &[Vertex] = &[
+    // Front face (counterclockwise when viewed from the front)
     Vertex {
-        position: [-0.0868241, 0.49240386, 0.0],
-        tex_coords: [0.4131759, 0.00759614],
-    }, // A
+        position: [-0.5, -0.5, 0.5],
+        tex_coords: [0.0, 0.0],
+    }, // 0
     Vertex {
-        position: [-0.49513406, 0.06958647, 0.0],
-        tex_coords: [0.0048659444, 0.43041354],
-    }, // B
+        position: [0.5, -0.5, 0.5],
+        tex_coords: [1.0, 0.0],
+    }, // 1
     Vertex {
-        position: [-0.21918549, -0.44939706, 0.0],
-        tex_coords: [0.28081453, 0.949397],
-    }, // C
+        position: [0.5, 0.5, 0.5],
+        tex_coords: [1.0, 1.0],
+    }, // 2
     Vertex {
-        position: [0.35966998, -0.3473291, 0.0],
-        tex_coords: [0.85967, 0.84732914],
-    }, // D
+        position: [-0.5, 0.5, 0.5],
+        tex_coords: [0.0, 1.0],
+    }, // 3
+    // Back face (counterclockwise when viewed from the back)
     Vertex {
-        position: [0.44147372, 0.2347359, 0.0],
-        tex_coords: [0.9414737, 0.2652641],
-    }, // E
+        position: [0.5, -0.5, -0.5],
+        tex_coords: [0.0, 0.0],
+    }, // 4
+    Vertex {
+        position: [-0.5, -0.5, -0.5],
+        tex_coords: [1.0, 0.0],
+    }, // 5
+    Vertex {
+        position: [-0.5, 0.5, -0.5],
+        tex_coords: [1.0, 1.0],
+    }, // 6
+    Vertex {
+        position: [0.5, 0.5, -0.5],
+        tex_coords: [0.0, 1.0],
+    }, // 7
+    // Top face (counterclockwise when viewed from the top)
+    Vertex {
+        position: [-0.5, 0.5, 0.5],
+        tex_coords: [0.0, 1.0],
+    }, // 8
+    Vertex {
+        position: [0.5, 0.5, 0.5],
+        tex_coords: [1.0, 1.0],
+    }, // 9
+    Vertex {
+        position: [0.5, 0.5, -0.5],
+        tex_coords: [1.0, 0.0],
+    }, // 10
+    Vertex {
+        position: [-0.5, 0.5, -0.5],
+        tex_coords: [0.0, 0.0],
+    }, // 11
+    // Bottom face (counterclockwise when viewed from the bottom)
+    Vertex {
+        position: [-0.5, -0.5, -0.5],
+        tex_coords: [0.0, 0.0],
+    }, // 12
+    Vertex {
+        position: [0.5, -0.5, -0.5],
+        tex_coords: [1.0, 0.0],
+    }, // 13
+    Vertex {
+        position: [0.5, -0.5, 0.5],
+        tex_coords: [1.0, 1.0],
+    }, // 14
+    Vertex {
+        position: [-0.5, -0.5, 0.5],
+        tex_coords: [0.0, 1.0],
+    }, // 15
+    // Right face (counterclockwise when viewed from the right)
+    Vertex {
+        position: [0.5, -0.5, 0.5],
+        tex_coords: [0.0, 0.0],
+    }, // 16
+    Vertex {
+        position: [0.5, -0.5, -0.5],
+        tex_coords: [1.0, 0.0],
+    }, // 17
+    Vertex {
+        position: [0.5, 0.5, -0.5],
+        tex_coords: [1.0, 1.0],
+    }, // 18
+    Vertex {
+        position: [0.5, 0.5, 0.5],
+        tex_coords: [0.0, 1.0],
+    }, // 19
+    // Left face (counterclockwise when viewed from the left)
+    Vertex {
+        position: [-0.5, -0.5, -0.5],
+        tex_coords: [0.0, 0.0],
+    }, // 20
+    Vertex {
+        position: [-0.5, -0.5, 0.5],
+        tex_coords: [1.0, 0.0],
+    }, // 21
+    Vertex {
+        position: [-0.5, 0.5, 0.5],
+        tex_coords: [1.0, 1.0],
+    }, // 22
+    Vertex {
+        position: [-0.5, 0.5, -0.5],
+        tex_coords: [0.0, 1.0],
+    }, // 23
 ];
 
-const INDICES: &[u16] = &[0, 1, 4, 1, 2, 4, 2, 3, 4];
+const INDICES: &[u16] = &[
+    // Front face
+    0, 1, 2, 2, 3, 0, // Back face
+    4, 5, 6, 6, 7, 4, // Top face
+    8, 9, 10, 10, 11, 8, // Bottom face
+    12, 13, 14, 14, 15, 12, // Right face
+    16, 17, 18, 18, 19, 16, // Left face
+    20, 21, 22, 22, 23, 20,
+];
 
 const NUM_INSTANCES_PER_ROW: u32 = 10;
 const INSTANCE_DISPLACEMENT: cgmath::Vector3<f32> = cgmath::Vector3::new(
@@ -246,6 +361,8 @@ impl<'a> Graphics<'a> {
             }],
             label: Some("camera_bind_group"),
         });
+
+        println!("{:?}", INSTANCE_DISPLACEMENT);
 
         let instances = (0..NUM_INSTANCES_PER_ROW)
             .flat_map(|z| {
