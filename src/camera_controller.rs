@@ -15,6 +15,8 @@ pub struct CameraController {
     pub is_backward_pressed: bool,
     pub is_left_pressed: bool,
     pub is_right_pressed: bool,
+    pub is_up_pressed: bool,
+    pub is_down_pressed: bool,
     pub mouse_delta: (f32, f32), // (delta_x, delta_y)
 }
 
@@ -27,6 +29,8 @@ impl CameraController {
             is_backward_pressed: false,
             is_left_pressed: false,
             is_right_pressed: false,
+            is_up_pressed: false,
+            is_down_pressed: false,
             mouse_delta: (0.0, 0.0),
         }
     }
@@ -58,6 +62,14 @@ impl CameraController {
                     }
                     KeyCode::KeyD | KeyCode::ArrowRight => {
                         self.is_right_pressed = is_pressed;
+                        true
+                    }
+                    KeyCode::Space => {
+                        self.is_up_pressed = is_pressed;
+                        true
+                    }
+                    KeyCode::ShiftLeft => {
+                        self.is_down_pressed = is_pressed;
                         true
                     }
                     _ => false,
@@ -99,6 +111,14 @@ impl CameraController {
         }
         if self.is_left_pressed {
             camera.eye -= right * self.speed;
+        }
+
+        // Move up and down
+        if self.is_up_pressed {
+            camera.eye += camera.up * self.speed; // Move up
+        }
+        if self.is_down_pressed {
+            camera.eye -= camera.up * self.speed; // Move down
         }
 
         // Update the target after moving the eye
