@@ -65,36 +65,36 @@ const VERTICES: &[Vertex] = &[
     // Front face (counterclockwise when viewed from the front)
     Vertex {
         position: [-0.5, -0.5, 0.5],
-        tex_coords: [0.0, 0.0],
+        tex_coords: [0.0, 1.0],
     }, // 0
     Vertex {
         position: [0.5, -0.5, 0.5],
-        tex_coords: [1.0, 0.0],
+        tex_coords: [1.0, 1.0],
     }, // 1
     Vertex {
         position: [0.5, 0.5, 0.5],
-        tex_coords: [1.0, 1.0],
+        tex_coords: [1.0, 0.0],
     }, // 2
     Vertex {
         position: [-0.5, 0.5, 0.5],
-        tex_coords: [0.0, 1.0],
+        tex_coords: [0.0, 0.0],
     }, // 3
     // Back face (counterclockwise when viewed from the back)
     Vertex {
         position: [0.5, -0.5, -0.5],
-        tex_coords: [0.0, 0.0],
+        tex_coords: [0.0, 1.0],
     }, // 4
     Vertex {
         position: [-0.5, -0.5, -0.5],
-        tex_coords: [1.0, 0.0],
+        tex_coords: [1.0, 1.0],
     }, // 5
     Vertex {
         position: [-0.5, 0.5, -0.5],
-        tex_coords: [1.0, 1.0],
+        tex_coords: [1.0, 0.0],
     }, // 6
     Vertex {
         position: [0.5, 0.5, -0.5],
-        tex_coords: [0.0, 1.0],
+        tex_coords: [0.0, 0.0],
     }, // 7
     // Top face (counterclockwise when viewed from the top)
     Vertex {
@@ -133,36 +133,36 @@ const VERTICES: &[Vertex] = &[
     // Right face (counterclockwise when viewed from the right)
     Vertex {
         position: [0.5, -0.5, 0.5],
-        tex_coords: [0.0, 0.0],
+        tex_coords: [0.0, 1.0],
     }, // 16
     Vertex {
         position: [0.5, -0.5, -0.5],
-        tex_coords: [1.0, 0.0],
+        tex_coords: [1.0, 1.0],
     }, // 17
     Vertex {
         position: [0.5, 0.5, -0.5],
-        tex_coords: [1.0, 1.0],
+        tex_coords: [1.0, 0.0],
     }, // 18
     Vertex {
         position: [0.5, 0.5, 0.5],
-        tex_coords: [0.0, 1.0],
+        tex_coords: [0.0, 0.0],
     }, // 19
     // Left face (counterclockwise when viewed from the left)
     Vertex {
         position: [-0.5, -0.5, -0.5],
-        tex_coords: [0.0, 0.0],
+        tex_coords: [0.0, 1.0],
     }, // 20
     Vertex {
         position: [-0.5, -0.5, 0.5],
-        tex_coords: [1.0, 0.0],
+        tex_coords: [1.0, 1.0],
     }, // 21
     Vertex {
         position: [-0.5, 0.5, 0.5],
-        tex_coords: [1.0, 1.0],
+        tex_coords: [1.0, 0.0],
     }, // 22
     Vertex {
         position: [-0.5, 0.5, -0.5],
-        tex_coords: [0.0, 1.0],
+        tex_coords: [0.0, 0.0],
     }, // 23
 ];
 
@@ -176,7 +176,7 @@ const INDICES: &[u16] = &[
     20, 21, 22, 22, 23, 20,
 ];
 
-const NUM_INSTANCES_PER_ROW: u32 = 10;
+const NUM_INSTANCES_PER_ROW: u32 = 1;
 const INSTANCE_DISPLACEMENT: cgmath::Vector3<f32> = cgmath::Vector3::new(
     NUM_INSTANCES_PER_ROW as f32 * 0.5,
     0.0,
@@ -269,7 +269,7 @@ impl<'a> Graphics<'a> {
 
         let diffuse_bytes = include_bytes!("../assets/perfect.jpeg");
         let diffuse_texture =
-            texture::Texture::from_bytes(&device, &queue, diffuse_bytes, "../assets/b.jpeg")
+            texture::Texture::from_bytes(&device, &queue, diffuse_bytes, "../assets/perfect.jpeg")
                 .unwrap();
 
         let texture_bind_group_layout =
@@ -362,8 +362,6 @@ impl<'a> Graphics<'a> {
             label: Some("camera_bind_group"),
         });
 
-        println!("{:?}", INSTANCE_DISPLACEMENT);
-
         let instances = (0..NUM_INSTANCES_PER_ROW)
             .flat_map(|z| {
                 (0..NUM_INSTANCES_PER_ROW).map(move |x| {
@@ -381,7 +379,11 @@ impl<'a> Graphics<'a> {
                             cgmath::Deg(0.0),
                         )
                     } else {
-                        cgmath::Quaternion::from_axis_angle(position.normalize(), cgmath::Deg(45.0))
+                        //cgmath::Quaternion::from_axis_angle(position.normalize(), cgmath::Deg(45.0))
+                        cgmath::Quaternion::from_axis_angle(
+                            cgmath::Vector3::unit_z(),
+                            cgmath::Deg(0.0),
+                        )
                     };
 
                     Instance { position, rotation }
