@@ -1,13 +1,14 @@
+use instant::Instant;
+use winit::{
+    event::{DeviceEvent, ElementState, Event, KeyEvent, WindowEvent},
+    event_loop::EventLoop,
+    keyboard::{KeyCode, PhysicalKey},
+    window::CursorGrabMode,
+};
 mod camera;
 mod camera_controller;
 mod graphics;
 mod texture;
-
-use winit::{
-    event::{ElementState, Event, KeyEvent, WindowEvent},
-    event_loop::EventLoop,
-    keyboard::{KeyCode, PhysicalKey},
-};
 
 use crate::graphics::Graphics;
 
@@ -21,6 +22,14 @@ pub async fn run() {
         .unwrap();
 
     let mut graphics = Graphics::new(&window).await;
+
+    // Grab the cursor and hide it
+    if let Err(e) = window.set_cursor_grab(CursorGrabMode::Confined) {
+        eprintln!("Failed to grab cursor: {:?}", e);
+    }
+    graphics.window.set_cursor_visible(false);
+
+    let mut last_frame_time = instant::Instant::now();
 
     event_loop
         .run(move |event, control_flow| match event {
@@ -41,7 +50,22 @@ pub async fn run() {
                             ..
                         } => control_flow.exit(),
                         WindowEvent::Resized(physical_size) => graphics.resize(*physical_size),
+                        WindowEvent::Focused(focused) => {
+                            // Re-grab the cursor and hide it when the window is focused
+                            if *focused {
+                                if let Err(e) =
+                                    graphics.window.set_cursor_grab(CursorGrabMode::Confined)
+                                {
+                                    eprintln!("Failed to grab cursor: {:?}", e);
+                                }
+                                graphics.window.set_cursor_visible(false);
+                            }
+                        }
                         WindowEvent::RedrawRequested => {
+                            let now = instant::Instant::now();
+                            let dt = now.duration_since(last_frame_time).as_secs_f32();
+                            last_frame_time = now;
+
                             graphics.update();
                             match graphics.render() {
                                 Ok(_) => {}
@@ -53,21 +77,20 @@ pub async fn run() {
                                 Err(e) => eprintln!("{:?}", e),
                             }
                         }
-
-                        WindowEvent::KeyboardInput {
-                            device_id,
-                            event,
-                            is_synthetic,
-                        } => {
-                            // println!("input {:?}", event);
-                        }
                         _ => {}
                     }
                 }
             }
+            Event::DeviceEvent {
+                event: DeviceEvent::MouseMotion { delta },
+                ..
+            } => {
+                graphics
+                    .camera_controller
+                    .process_mouse(delta.0 as f32, delta.1 as f32);
+            }
             Event::AboutToWait => {
-                // RedrawRequested will only trigger once unless we manually
-                // request it.
+                graphics.update();
                 graphics.window().request_redraw();
             }
             _ => {}

@@ -1,26 +1,33 @@
+use cgmath::{InnerSpace, Vector3};
 use winit::{
+    dpi::PhysicalPosition,
     event::{ElementState, KeyEvent, WindowEvent},
     keyboard::{KeyCode, PhysicalKey},
+    window::Window,
 };
 
 use crate::camera::Camera;
 
 pub struct CameraController {
     pub speed: f32,
+    pub sensitivity: f32, // Mouse sensitivity
     pub is_forward_pressed: bool,
     pub is_backward_pressed: bool,
     pub is_left_pressed: bool,
     pub is_right_pressed: bool,
+    pub mouse_delta: (f32, f32), // (delta_x, delta_y)
 }
 
 impl CameraController {
-    pub fn new(speed: f32) -> Self {
+    pub fn new(speed: f32, sensitivity: f32) -> Self {
         Self {
             speed,
+            sensitivity,
             is_forward_pressed: false,
             is_backward_pressed: false,
             is_left_pressed: false,
             is_right_pressed: false,
+            mouse_delta: (0.0, 0.0),
         }
     }
 
@@ -60,35 +67,51 @@ impl CameraController {
         }
     }
 
-    pub fn update_camera(&self, camera: &mut Camera) {
-        use cgmath::InnerSpace;
-        let forward = camera.target - camera.eye;
-        let forward_norm = forward.normalize();
-        let forward_mag = forward.magnitude();
+    pub fn process_mouse(&mut self, delta_x: f32, delta_y: f32) {
+        self.mouse_delta = (delta_x, delta_y);
+    }
 
-        // Prevents glitching when the camera gets too close to the
-        // center of the scene.
-        if self.is_forward_pressed && forward_mag > self.speed {
-            camera.eye += forward_norm * self.speed;
+    pub fn update_camera(&mut self, camera: &mut Camera) {
+        // Update pitch and yaw based on mouse movement
+        camera.yaw += self.mouse_delta.0 * self.sensitivity;
+        camera.pitch -= self.mouse_delta.1 * self.sensitivity;
+        camera.pitch = camera.pitch.clamp(-89.0, 89.0);
+
+        // Reset mouse delta after processing
+        self.mouse_delta = (0.0, 0.0);
+
+        // Update the camera's target
+        camera.update_target();
+
+        // Calculate movement direction
+        let forward = (camera.target - camera.eye).normalize();
+        let right = forward.cross(camera.up).normalize();
+
+        // Update position based on input
+        if self.is_forward_pressed {
+            camera.eye += forward * self.speed;
         }
         if self.is_backward_pressed {
-            camera.eye -= forward_norm * self.speed;
+            camera.eye -= forward * self.speed;
         }
-
-        let right = forward_norm.cross(camera.up);
-
-        // Redo radius calc in case the forward/backward is pressed.
-        let forward = camera.target - camera.eye;
-        let forward_mag = forward.magnitude();
-
         if self.is_right_pressed {
-            // Rescale the distance between the target and the eye so
-            // that it doesn't change. The eye, therefore, still
-            // lies on the circle made by the target and eye.
-            camera.eye = camera.target - (forward + right * self.speed).normalize() * forward_mag;
+            camera.eye += right * self.speed;
         }
         if self.is_left_pressed {
-            camera.eye = camera.target - (forward - right * self.speed).normalize() * forward_mag;
+            camera.eye -= right * self.speed;
+        }
+
+        // Update the target after moving the eye
+        camera.target = camera.eye + forward;
+    }
+
+    pub fn re_center_mouse(&self, window: &Window) {
+        let window_size = window.inner_size();
+        let center_x = window_size.width as f64 / 2.0;
+        let center_y = window_size.height as f64 / 2.0;
+
+        if let Err(e) = window.set_cursor_position(PhysicalPosition::new(center_x, center_y)) {
+            eprintln!("Failed to re-center cursor: {:?}", e);
         }
     }
 }

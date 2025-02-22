@@ -315,19 +315,18 @@ impl<'a> Graphics<'a> {
             label: Some("diffuse_bind_group"),
         });
 
-        let camera = camera::Camera {
-            // position the camera 1 unit up and 2 units back
-            // +z is out of the screen
-            eye: (0.0, 1.0, 2.0).into(),
-            // have it look at the origin
-            target: (0.0, 0.0, 0.0).into(),
-            // which way is "up"
-            up: cgmath::Vector3::unit_y(),
-            aspect: config.width as f32 / config.height as f32,
-            fovy: 45.0,
-            znear: 0.1,
-            zfar: 100.0,
-        };
+        let camera = camera::Camera::new(
+            (0.0, 1.0, 2.0).into(),                     // Eye position
+            (0.0, 0.0, 0.0).into(),                     // Target position
+            cgmath::Vector3::unit_y(),                  // Up vector
+            config.width as f32 / config.height as f32, // Aspect ratio
+            50.0,                                       // FOV // default: 50
+            0.1,                                        // Near plane
+            100.0,                                      // Far plane
+        );
+
+        // Update the CameraController initialization
+        let camera_controller = CameraController::new(0.1, 1.0);
 
         let mut camera_uniform = camera::CameraUniform::new();
         camera_uniform.update_view_proj(&camera);
@@ -463,8 +462,6 @@ impl<'a> Graphics<'a> {
 
         let num_indices = INDICES.len() as u32;
 
-        let camera_controller = CameraController::new(0.2);
-
         Self {
             surface,
             device,
@@ -531,7 +528,6 @@ impl<'a> Graphics<'a> {
             bytemuck::cast_slice(&[self.camera_uniform]),
         );
     }
-
     pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
         let output = self.surface.get_current_texture()?;
 

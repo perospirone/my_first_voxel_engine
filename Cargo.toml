@@ -18,6 +18,7 @@ wgpu = "22.0"
 bytemuck = { version = "1.16", features = ["derive"] }
 anyhow = "1.0"
 cgmath = "0.18"
+instant = "0.1"
 
 [dependencies.image]
 version = "0.24"
