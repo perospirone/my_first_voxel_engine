@@ -267,9 +267,9 @@ impl<'a> Graphics<'a> {
             desired_maximum_frame_latency: 2,
         };
 
-        let diffuse_bytes = include_bytes!("../assets/perfect.jpeg");
+        let diffuse_bytes = include_bytes!("../assets/b.jpeg");
         let diffuse_texture =
-            texture::Texture::from_bytes(&device, &queue, diffuse_bytes, "../assets/perfect.jpeg")
+            texture::Texture::from_bytes(&device, &queue, diffuse_bytes, "../assets/b.jpeg")
                 .unwrap();
 
         let texture_bind_group_layout =
