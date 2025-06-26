@@ -1,4 +1,3 @@
-use bytemuck;
 use cgmath::prelude::*;
 use wgpu::util::DeviceExt;
 use winit::{event::WindowEvent, window::Window};
@@ -326,7 +325,7 @@ impl<'a> Graphics<'a> {
         );
 
         // Update the CameraController initialization
-        let camera_controller = CameraController::new(0.1, 1.0);
+        let camera_controller = CameraController::new(0.01, 0.1);
 
         let mut camera_uniform = camera::CameraUniform::new();
         camera_uniform.update_view_proj(&camera);
